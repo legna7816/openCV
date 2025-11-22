@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import cv2
+import numpy as np
+from PIL import Image, ImageTk
 from engine.collage_generator import CollageGenerator
 
 class MainWindow:
@@ -33,7 +36,6 @@ class MainWindow:
         self.root.config(menu=menubar)
 
     def _create_layout(self):
-        # 왼쪽 제어판
         left = tk.Frame(self.root, width=260, bg="#f5f5f5")
         left.pack(side="left", fill="y")
 
@@ -59,7 +61,6 @@ class MainWindow:
         btn_frame.pack(padx=8, pady=10, fill="x")
         tk.Button(btn_frame, text="콜라주 생성", command=self._generate_collage).pack(fill="x")
 
-        # 우측 미리보기 캔버스
         self.preview_frame = tk.Frame(self.root, bg="white")
         self.preview_frame.pack(side="right", fill="both", expand=True)
         self.info_label = tk.Label(self.preview_frame, text="이미지를 불러오고 '콜라주 생성'을 누르세요.", font=("Arial",14), fg="gray")
@@ -101,19 +102,22 @@ class MainWindow:
             )
             self.last_result = result
             self._show_result_on_frame(result)
-            # messagebox.showinfo("완료", "콜라주 생성 완료!")
         except Exception as e:
             messagebox.showerror("오류", f"콜라주 생성 실패:\n{e}")
 
-    def _show_result_on_frame(self, pil_img):
-        # 간단히 캔버스에 축소된 미리보기 표시
-        from PIL import ImageTk
-        w, h = pil_img.size
+    def _show_result_on_frame(self, img_bgra):
+        h, w = img_bgra.shape[:2]
         maxw = self.preview_frame.winfo_width() or 800
         maxh = self.preview_frame.winfo_height() or 600
         scale = min(maxw / w, maxh / h, 1.0)
-        disp = pil_img.resize((int(w*scale), int(h*scale)))
-        self.tkimg = ImageTk.PhotoImage(disp)
+        
+        new_w, new_h = int(w * scale), int(h * scale)
+        resized = cv2.resize(img_bgra, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        
+        rgba = cv2.cvtColor(resized, cv2.COLOR_BGRA2RGBA)
+        pil_img = Image.fromarray(rgba)
+        
+        self.tkimg = ImageTk.PhotoImage(pil_img)
         for widget in self.preview_frame.winfo_children():
             widget.destroy()
         lbl = tk.Label(self.preview_frame, image=self.tkimg)
@@ -130,11 +134,13 @@ class MainWindow:
         )
         if not path:
             return
+        
         if path.lower().endswith(".jpg") or path.lower().endswith(".jpeg"):
-            rgb = self.last_result.convert("RGB")
-            rgb.save(path, quality=95)
+            bgr = cv2.cvtColor(self.last_result, cv2.COLOR_BGRA2BGR)
+            cv2.imwrite(path, bgr, [cv2.IMWRITE_JPEG_QUALITY, 95])
         else:
-            self.last_result.save(path)
+            cv2.imwrite(path, self.last_result)
+        
         messagebox.showinfo("저장완료", f"저장됨: {path}")
 
     def run(self):
