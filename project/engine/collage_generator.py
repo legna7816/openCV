@@ -9,7 +9,7 @@ from engine.image_manager import ImageManager
 class CollageGenerator:
     
     def __init__(self):
-        self.image_manager = ImageManager(resize_scale_factor=1.2)
+        self.image_manager = ImageManager()
         self.masker = MaskGenerator()
         self.placer = Placer()
         self.canvas_margin = 100

@@ -5,7 +5,7 @@ import random
 # 이미지 로딩 및 변환 관리 클래스
 class ImageManager:
     
-    def __init__(self, resize_scale_factor=1.2):
+    def __init__(self, resize_scale_factor=1.4):
         self.resize_scale_factor = resize_scale_factor
 
     # 이미지 로드 및 BGRA 변환

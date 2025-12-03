@@ -22,7 +22,7 @@ class MainWindow:
 
         file_menu = tk.Menu(menubar, tearoff=0)
         file_menu.add_command(label="이미지 불러오기", command=self._open_files)
-        file_menu.add_command(label="초기화(선택 제거)", command=self._clear_selection)
+        file_menu.add_command(label="초기화", command=self._clear_selection)
         file_menu.add_separator()
         file_menu.add_command(label="프로젝트 저장(결과 PNG)", command=self._save_result)
         file_menu.add_separator()
@@ -93,7 +93,7 @@ class MainWindow:
     def _open_files(self):
         paths = filedialog.askopenfilenames(
             title="이미지 선택 (여러 개 가능)",
-            filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp")]
+            filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.bmp;*.webp")]
         )
         if paths:
             for p in paths:
